@@ -31,12 +31,28 @@ app.post('/', jsonParser,(req, res) => {
     if (content === "") {
         res.status(400)
     }
-    var data = require('./data.json')
+    var data = ""
 
-    
+    fs.readFile('data.json', 'utf8', function readFileCallback(err, data){
+        if (err){
+            console.log(err);
+        } else {
+            var dataObj = JSON.parse(data);
+            let length = Object.keys(dataObj.lore).length
+
+            dataObj.lore.push({id: length + 1, txt: content})
+            dataObj = JSON.stringify(dataObj)
+
+            fs.writeFile('data.json', dataObj, 'utf8', function errorCheck(err){
+                if (err) {
+                    console.log(err)
+                }
+            });
+
+        }
+    });
 
 
-    console.log(len + 1, content)
     res.status(200).json("Successful request!")
 })
 
