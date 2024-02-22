@@ -25,28 +25,46 @@ app.get('/', (req, res) => {
     res.render('index', {})
 })
 
+function findDuplicate(copy){
+    fs.readFile('data.json', 'utf8', function readFileCallback(err, data){
+        if (err){
+            console.log(err);
+        } else {
+            let obj = JSON.parse(data)
+            let allObjects = Object.values(obj.lore)
+
+            for (let i = 0; i < allObjects.length; i++){
+                if (allObjects[i] === copy) {
+                    return true
+                }
+            }
+
+            return false
+
+        }
+    })
+}
 
 app.post('/', jsonParser,(req, res) => {
     let content = req.body.reminder
-    if (content === "") {
+    if (content === "" || findDuplicate(content)) {
         res.status(400)
     }
-    var data = ""
 
     fs.readFile('data.json', 'utf8', function readFileCallback(err, data){
         if (err){
             console.log(err);
         } else {
             var dataObj = JSON.parse(data);
-            let length = Object.keys(dataObj.lore).length
+            let id = Object.keys(dataObj.lore).length + 1
 
-            dataObj.lore.push({id: length + 1, txt: content})
+            dataObj.lore.push({[id]: {txt: content}})
             dataObj = JSON.stringify(dataObj)
 
             fs.writeFile('data.json', dataObj, 'utf8', function errorCheck(err){
                 if (err) {
                     console.log(err)
-                }
+                } 
             });
 
         }
