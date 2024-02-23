@@ -74,8 +74,47 @@ app.post('/', jsonParser,(req, res) => {
     res.status(200).json("Successful request!")
 })
 
-app.delete('/', (req, res) => {
+function checkValiditys(keys, id){
+    for (let i = 0; i < keys.length; i++) {
+        
+        if (keys[i] === id ) {
+            return i
+        }
+    }
+    return false
+}
+
+app.delete('/', jsonParser, (req, res) => {
     let id = req.body.id
+
+    fs.readFile('data.json', 'utf8', function readFileCallback(err, data){
+        if (err){
+            console.log(err);
+        } else {
+            var dataObj = JSON.parse(data);
+            let keys = Object.keys(dataObj.lore)
+
+            var validIndex = checkValidity(keys, id)
+            console.log(validIndex)
+            if (validIndex){
+                //delete
+                delete dataObj.lore[validIndex]
+                res.status(200).json('Deleted reminder with id ' + id)
+            } else {
+                res.status(400)
+            }
+
+            dataObj = JSON.stringify(dataObj)
+
+            fs.writeFile('data.json', dataObj, 'utf8', function errorCheck(err){
+                if (err) {
+                    console.log(err)
+                } 
+            });
+
+        }
+    });
+
 })
 
 //send at 6AM everyday
